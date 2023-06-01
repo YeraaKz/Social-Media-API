@@ -1,14 +1,12 @@
-package com.example.Social.Media.API.service;
+package com.example.Social.Media.API.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,7 +41,7 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
-                .signWith(getSigningKey(), SignatureAlgorithm.ES256)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -60,7 +58,6 @@ public class JwtService {
         return (username).equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
-
     public Claims extractAllClaims(String token){
         return Jwts
                 .parserBuilder()
@@ -71,7 +68,7 @@ public class JwtService {
     }
 
     private Key getSigningKey() {
-        return Keys.keyPairFor(SignatureAlgorithm.ES256).getPrivate();
-
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

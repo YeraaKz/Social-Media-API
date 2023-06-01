@@ -1,5 +1,6 @@
 package com.example.Social.Media.API.service;
 
+import com.example.Social.Media.API.config.JwtService;
 import com.example.Social.Media.API.model.Role;
 import com.example.Social.Media.API.model.User;
 import com.example.Social.Media.API.repository.UserRepository;
