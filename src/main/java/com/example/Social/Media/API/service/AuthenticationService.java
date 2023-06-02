@@ -1,8 +1,8 @@
 package com.example.Social.Media.API.service;
 
 import com.example.Social.Media.API.config.JwtService;
-import com.example.Social.Media.API.model.Role;
-import com.example.Social.Media.API.model.User;
+import com.example.Social.Media.API.entity.Role;
+import com.example.Social.Media.API.entity.User;
 import com.example.Social.Media.API.repository.UserRepository;
 import com.example.Social.Media.API.rest.auth.AuthenticationRequest;
 import com.example.Social.Media.API.rest.auth.AuthenticationResponse;

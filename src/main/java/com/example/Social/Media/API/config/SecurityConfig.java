@@ -1,5 +1,6 @@
 package com.example.Social.Media.API.config;
 
+import com.example.Social.Media.API.entity.Role;
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -1,6 +1,6 @@
 package com.example.Social.Media.API.repository;
 
-import com.example.Social.Media.API.model.User;
+import com.example.Social.Media.API.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
