@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,18 +94,35 @@ public class DemoController {
         return ResponseEntity.ok(userService.getFriendRequests(id));
     }
 
-    @PostMapping("/users/{id}/receivedFriendRequests/{senderId}")
+    @PostMapping("/users/{id}/receivedFriendRequests/{senderId}/accept")
     public ResponseEntity<String> acceptFriendRequest(@PathVariable("id") Long receiverId,
-                                                 @PathVariable("senderId") Long senderId){
+                                                      @PathVariable("senderId") Long senderId){
         userService.acceptFriendRequest(receiverId, senderId);
 
         return ResponseEntity.ok("Friend request accepted");
+    }
+
+    @PostMapping("/users/{id}/receivedFriendRequests/{senderId}/decline")
+    public ResponseEntity<String> declineFriendRequests(@PathVariable("id") Long receiverId,
+                                                        @PathVariable("senderId") Long senderId){
+
+        userService.declineFriendRequest(receiverId, senderId);
+
+        return ResponseEntity.ok("Friend request declined");
     }
 
     @GetMapping("/users/{id}/friendList")
     public ResponseEntity<Set<UserDto>> getUserFriends(@PathVariable("id") Long id){
         return ResponseEntity.ok(userService.getUserFriends(id));
     }
+
+    @DeleteMapping("/users/{id}/friendList/{userToBeDeletedId}")
+    public ResponseEntity<String> deleteFromFriends(@PathVariable("id") Long id,
+                                               @PathVariable("userToBeDeletedId") Long userToBeDeletedId){
+        userService.deleteFromFriends(id, userToBeDeletedId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User successfully removed from friend list.");
+    }
+
 
     @GetMapping("/users/{id}/posts")
     public ResponseEntity<List<PostDto>> getUserPosts(@PathVariable("id") Long id){
@@ -116,6 +134,11 @@ public class DemoController {
         return ResponseEntity.ok(postService.findAll());
     }
 
+    @PostMapping("/posts")
+    public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto){
+        return ResponseEntity.ok(postService.createPost(postDto));
+    }
+
     @PutMapping("/posts/{id}")
     public ResponseEntity<PostDto> editPost(@PathVariable("id") Long id, @RequestBody PostDto updatedPost){
         return ResponseEntity.ok(postService.update(id, updatedPost));
@@ -125,10 +148,4 @@ public class DemoController {
     public ResponseEntity<Long> deletePost(@PathVariable("id") Long id){
         return ResponseEntity.ok(postService.delete(id));
     }
-
-    @PostMapping("/posts/addPost")
-    public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto){
-        return ResponseEntity.ok(postService.createPost(postDto));
-    }
-
 }

@@ -192,13 +192,22 @@ public class UserService {
                 receiver.getFriends().add(sender);
                 sender.getFriends().add(receiver);
 
+                receiver.getSubscribers().add(sender);
+
                 userRepository.save(receiver);
                 userRepository.save(sender);
 
                 friendRequestService.deleteBySenderAndReceiver(receiver, sender);
+
+                userRepository.save(receiver);
+
+                userRepository.save(sender);
+
                 return FriendRequestResponse.FRIENDSHIP_ESTABILISHED;
             }
             else{
+
+                receiver.getSubscribers().add(sender);
 
                 FriendRequest friendRequest = FriendRequest.builder()
                         .sender(sender)
@@ -230,10 +239,29 @@ public class UserService {
 
         receiver.getFriends().add(sender);
 
+        sender.getSubscribers().add(receiver);
+
+        userRepository.save(sender);
         userRepository.save(receiver);
 
         friendRequestService.delete(friendRequest);
 
+    }
+
+    @Transactional
+    public void declineFriendRequest(Long receiverId, Long senderId) {
+
+        checkAccess(receiverId);
+
+        User receiver = userRepository.findById(receiverId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id " + receiverId));
+
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id "+ senderId));
+
+        FriendRequest friendRequest = friendRequestService.findByReceiverAndSender(receiver, sender);
+
+        friendRequestService.delete(friendRequest);
     }
 
     public User getCurrentUser(){
@@ -246,6 +274,28 @@ public class UserService {
     public  void checkAccess(Long id){
         if(!getCurrentUser().getId().equals(id)){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access forbidden");
+        }
+    }
+
+    @Transactional
+    public void deleteFromFriends(Long id, Long userToBeDeletedId) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id " + id));
+
+        User userToBeDeleted = userRepository.findById(userToBeDeletedId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id " + userToBeDeletedId));
+
+        if(user.getFriends().contains(userToBeDeleted)) {
+            user.getFriends().remove(userToBeDeleted);
+            userToBeDeleted.getFriends().remove(user);
+
+            user.getSubscribers().remove(userToBeDeleted);
+
+            userRepository.save(user);
+            userRepository.save(userToBeDeleted);
+        }
+        else{
+            throw new IllegalArgumentException("User " + userToBeDeleted + " is not a friend of User " + id);
         }
     }
 }

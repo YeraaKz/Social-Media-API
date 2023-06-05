@@ -54,6 +54,14 @@ public class User implements UserDetails {
     )
     private Set<User> friends = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "subscription",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "subscriber_id")
+    )
+    private List<User> subscribers = new ArrayList<>();
+
     @OneToMany(mappedBy = "receiver")
     private List<FriendRequest> friendRequests = new ArrayList<>();
 
