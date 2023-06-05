@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,7 +49,7 @@ public class UserService {
 
             if(!userList.isEmpty()){
                 userDtos = userList.stream()
-                        .map(user -> userConverter.convertEntityToDto(user))
+                        .map(userConverter::convertEntityToDto)
                         .collect(Collectors.toList());
             }
             else{
@@ -99,7 +100,7 @@ public class UserService {
                     orElseThrow(() -> new UserNotFoundException(("User not found with id " + id)));
             List<Post> userPosts = user.getPosts();
             postDtos = userPosts.stream()
-                    .map(post -> postConverter.convertEntityToDto(post))
+                    .map(postConverter::convertEntityToDto)
                     .collect(Collectors.toList());
 
             log.debug("UserService::getUserPosts retrieving user posts from database for id {} {}", id, postDtos);
@@ -147,6 +148,35 @@ public class UserService {
 
         log.info("UserService::getFriendRequests execution ended.");
         return friendRequestSenderList;
+    }
+
+
+    public Set<UserDto> getUserFriends(Long id) {
+        Set<UserDto> friendListDto;
+
+        try {
+
+            log.info("UserService::getUserFriends execution started.");
+
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new UserNotFoundException("User not found with id " + id));
+
+            Set<User> friendList = user.getFriends();
+
+            friendListDto = friendList.stream()
+                    .map(userConverter::convertEntityToDto)
+                    .collect(Collectors.toSet());
+
+            log.debug("UserService::getUserFriends retrieving user friends from database for id {} {}", id,
+                    friendListDto);
+
+        }catch (Exception e){
+            log.error("Exception occurred while retrieving friends of user from database, Exception message {}",
+                    id, e.getMessage());
+            throw new UserServiceBusinessException("Exception occurred while fetching user friends from Database " + id);
+        }
+        log.info("UserService::getUserFriends execution ended.");
+        return friendListDto;
     }
 
     @Transactional

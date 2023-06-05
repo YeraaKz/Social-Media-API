@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -98,6 +99,11 @@ public class DemoController {
         userService.acceptFriendRequest(receiverId, senderId);
 
         return ResponseEntity.ok("Friend request accepted");
+    }
+
+    @GetMapping("/users/{id}/friendList")
+    public ResponseEntity<Set<UserDto>> getUserFriends(@PathVariable("id") Long id){
+        return ResponseEntity.ok(userService.getUserFriends(id));
     }
 
     @GetMapping("/users/{id}/posts")
