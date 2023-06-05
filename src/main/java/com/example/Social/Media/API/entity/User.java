@@ -46,6 +46,17 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "friendship",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_id")
+    )
+    private Set<User> friends = new HashSet<>();
+
+    @OneToMany(mappedBy = "receiver")
+    private List<FriendRequest> friendRequests = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
@@ -92,4 +103,10 @@ public class User implements UserDetails {
                 ", role=" + role +
                 '}';
     }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(id, email, firstname, lastname);
+    }
+
 }

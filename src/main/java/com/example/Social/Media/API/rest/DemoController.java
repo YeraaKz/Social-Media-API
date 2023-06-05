@@ -3,13 +3,16 @@ package com.example.Social.Media.API.rest;
 import com.example.Social.Media.API.config.JwtAuthenticationFilter;
 import com.example.Social.Media.API.converter.PostConverter;
 import com.example.Social.Media.API.converter.UserConverter;
+import com.example.Social.Media.API.dto.FriendRequestResponse;
 import com.example.Social.Media.API.dto.PostDto;
 import com.example.Social.Media.API.dto.UserDto;
+import com.example.Social.Media.API.entity.FriendRequest;
 import com.example.Social.Media.API.entity.Post;
 import com.example.Social.Media.API.entity.User;
 import com.example.Social.Media.API.service.PostService;
 import com.example.Social.Media.API.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,12 +22,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/demo-controller")
 @RequiredArgsConstructor
+@Slf4j
 public class DemoController {
 
     private final PostService postService;
@@ -42,69 +47,82 @@ public class DemoController {
 
     @GetMapping("/users")
     public ResponseEntity<List<UserDto>> getAllUsers(){
-        List<User> users = userService.findAll();
-        List<UserDto> userDtos = users.stream()
-                .map(userConverter::convertEntityToDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(userDtos);
+
+        List<UserDto> users = userService.findAll();
+
+        log.info("DemoController::getAllUsers response {}", users);
+
+        return ResponseEntity.ok(userService.findAll());
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserDto> userInfo(@PathVariable("id") Long id){
+
+        log.info("DemoController::userInfo by id {}", id);
+
+        UserDto userDto = userService.findById(id);
+
+        log.info("DemoController::userInfo by id {} response {}", id, userDto);
+
+        return ResponseEntity.ok(userDto);
+    }
+
+    @PostMapping("/users/{id}")
+    public ResponseEntity<String> sendFriendRequest(@PathVariable("id") Long id){
+
+        log.info("DemoController::sendFriendRequest to id {}", id);
+        FriendRequestResponse response = userService.sendFriendRequest(id);
+
+        switch (response){
+            case REQUEST_SEND:
+                return ResponseEntity.ok("Friend Request send successfully");
+            case FRIENDSHIP_ESTABILISHED:
+                return ResponseEntity.ok("Friendship established successfully");
+            case ALREADY_FRIENDS:
+                return ResponseEntity.ok("Users are already friends");
+            default:
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred");
+        }
+    }
+
+    @GetMapping("/users/{id}/receivedFriendRequests")
+    public ResponseEntity<List<UserDto>> getFriendRequests(@PathVariable("id")Long id){
+
+        log.info("DemoController::getFriendRequests by id {}", id);
+        return ResponseEntity.ok(userService.getFriendRequests(id));
+    }
+
+    @PostMapping("/users/{id}/receivedFriendRequests/{senderId}")
+    public ResponseEntity<String> acceptFriendRequest(@PathVariable("id") Long receiverId,
+                                                 @PathVariable("senderId") Long senderId){
+        userService.acceptFriendRequest(receiverId, senderId);
+
+        return ResponseEntity.ok("Friend request accepted");
     }
 
     @GetMapping("/users/{id}/posts")
     public ResponseEntity<List<PostDto>> getUserPosts(@PathVariable("id") Long id){
-        User user = userService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id :" + id + "was not found"));
-        List<Post> userPosts = user.getPosts();
-        List<PostDto> postDtos = userPosts.stream()
-                .map(postConverter::convertEntityToDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(postDtos);
+        return ResponseEntity.ok(userService.getUserPosts(id));
     }
 
     @GetMapping("/posts")
     public ResponseEntity<List<PostDto>> getAllPosts(){
-        List<Post> posts = postService.findAll();
-        List<PostDto> postDtos = posts.stream()
-                .map(postConverter::convertEntityToDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(postDtos);
+        return ResponseEntity.ok(postService.findAll());
     }
 
     @PutMapping("/posts/{id}")
     public ResponseEntity<PostDto> editPost(@PathVariable("id") Long id, @RequestBody PostDto updatedPost){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = userService.findByEmail(authentication.getName()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this email was not found"));
-        Post existingPost = postService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with this id: " + id + " was not found"));
-
-        if(!existingPost.getUser().equals(currentUser)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You dont have permission to update this post");
-        }
-
-        existingPost.setTitle(updatedPost.getTitle());
-        existingPost.setText(updatedPost.getText());
-        existingPost.setImage(updatedPost.getImage());
-
-        return ResponseEntity.ok(postService.save(existingPost));
+        return ResponseEntity.ok(postService.update(id, updatedPost));
     }
 
     @DeleteMapping("/posts/{id}")
     public ResponseEntity<Long> deletePost(@PathVariable("id") Long id){
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = userService.findByEmail(authentication.getName()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this email was not found"));
-        Post postToDelete = postService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with this id: " + id + " was not found"));
-
-        if(!postToDelete.getUser().equals(currentUser)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You dont have permission to delete this post");
-        }
-
-        postService.delete(postToDelete);
-
-        return ResponseEntity.ok(id);
+        return ResponseEntity.ok(postService.delete(id));
     }
 
     @PostMapping("/posts/addPost")
     public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = userService.findByEmail(authentication.getName()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this email was not found"));
-        return ResponseEntity.ok(postService.save(postDto, currentUser));
+        return ResponseEntity.ok(postService.createPost(postDto));
     }
+
 }

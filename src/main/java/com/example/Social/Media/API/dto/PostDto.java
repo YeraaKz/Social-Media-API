@@ -1,6 +1,5 @@
 package com.example.Social.Media.API.dto;
 
-import com.example.Social.Media.API.entity.User;
 import lombok.Data;
 
 @Data
