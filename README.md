@@ -53,7 +53,6 @@ PUT /api/v1/demo-controller/posts/{id}: Edit an existing post.
 DELETE /api/v1/demo-controller/posts/{id}: Delete a post.
 
 
-Feel free to customize the README file according to your specific project details, additional features, and any other information you'd like to include.
 
 
 
