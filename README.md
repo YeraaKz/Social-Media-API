@@ -21,7 +21,7 @@ Follow these steps to get the Social Media API up and running on your local mach
    
 2. Configure the database:
 
-  Create a MySQL database for the application.
+  Create a PostgreSQL database for the application.
   Update the database connection details in the application.properties file located in the src/main/resources directory
 
 3. Build the application: 
