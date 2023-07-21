@@ -123,7 +123,6 @@ public class DemoController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User successfully removed from friend list.");
     }
 
-
     @GetMapping("/users/{id}/posts")
     public ResponseEntity<List<PostDto>> getUserPosts(@PathVariable("id") Long id){
         return ResponseEntity.ok(userService.getUserPosts(id));
