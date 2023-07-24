@@ -36,21 +36,45 @@ Follow these steps to get the Social Media API up and running on your local mach
 The API will start running on http://localhost:8080.
 
 ## API Documentation
-The API endpoints and their usage are documented below:
 
-GET /api/v1/demo-controller/users: Get a list of all users.
-GET /api/v1/demo-controller/users/{id}: Get user information by ID.
-POST /api/v1/demo-controller/users/{id}: Send a friend request to a user.
-GET /api/v1/demo-controller/users/{id}/receivedFriendRequests: Get a list of friend requests received by a user.
-POST /api/v1/demo-controller/users/{id}/receivedFriendRequests/{senderId}/accept: Accept a friend request from a specific user.
-POST /api/v1/demo-controller/users/{id}/receivedFriendRequests/{senderId}/decline: Decline a friend request from a specific user.
-GET /api/v1/demo-controller/users/{id}/friendList: Get the friend list of a user.
-DELETE /api/v1/demo-controller/users/{id}/friendList/{userToBeDeletedId}: Remove a user from the friend list.
-GET /api/v1/demo-controller/users/{id}/posts: Get all posts by a user.
-GET /api/v1/demo-controller/posts: Get a list of all posts.
-POST /api/v1/demo-controller/posts: Create a new post.
-PUT /api/v1/demo-controller/posts/{id}: Edit an existing post.
-DELETE /api/v1/demo-controller/posts/{id}: Delete a post.
+Get a list of all users
+GET /api/v1/demo-controller/users
+
+Get user information by ID
+GET /api/v1/demo-controller/users/{id}
+
+Send a friend request to a user
+POST /api/v1/demo-controller/users/{id}
+
+Get a list of friend requests received by a user
+GET /api/v1/demo-controller/users/{id}/receivedFriendRequests
+
+Accept a friend request from a specific user
+POST /api/v1/demo-controller/users/{id}/receivedFriendRequests/{senderId}/accept
+
+Decline a friend request from a specific user
+POST /api/v1/demo-controller/users/{id}/receivedFriendRequests/{senderId}/decline
+
+Get the friend list of a user
+GET /api/v1/demo-controller/users/{id}/friendList
+
+Remove a user from the friend list
+DELETE /api/v1/demo-controller/users/{id}/friendList/{userToBeDeletedId}
+
+Get all posts by a user
+GET /api/v1/demo-controller/users/{id}/posts
+
+Get a list of all posts
+GET /api/v1/demo-controller/posts
+
+Create a new post
+POST /api/v1/demo-controller/posts
+
+Edit an existing post
+PUT /api/v1/demo-controller/posts/{id}
+
+Delete a post
+DELETE /api/v1/demo-controller/posts/{id}
 
 
 
